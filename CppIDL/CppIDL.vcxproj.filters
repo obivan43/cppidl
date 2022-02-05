@@ -25,9 +25,6 @@
     <ClCompile Include="source\model\CppIDLVariant.cpp">
       <Filter>source\model</Filter>
     </ClCompile>
-    <ClCompile Include="source\cppidl\cppidl.cpp">
-      <Filter>source\cppidl</Filter>
-    </ClCompile>
     <ClCompile Include="source\cppidl\goldparser.cpp">
       <Filter>source\cppidl</Filter>
     </ClCompile>
@@ -65,9 +62,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\cppidl.grm">
-      <Filter>data</Filter>
-    </None>
     <None Include="data\cppidl_enum.grm">
       <Filter>data</Filter>
     </None>

@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\cppidl\cppidl.cpp" />
     <ClCompile Include="source\cppidl\cppidlparser.cpp" />
     <ClCompile Include="source\cppidl\cppidl_enum.cpp" />
     <ClCompile Include="source\cppidl\goldparser.cpp" />
@@ -37,7 +36,6 @@
     <ClInclude Include="source\utils\utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\cppidl.grm" />
     <None Include="data\cppidl_enum.grm" />
     <None Include="data\test.cppidl" />
   </ItemGroup>
