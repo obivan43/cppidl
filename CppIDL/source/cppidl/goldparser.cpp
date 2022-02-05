@@ -5,33 +5,20 @@
 #include <iostream>
 #include <sstream>
 
-#include <io.h> // _access function
+#include <io.h>
 
 namespace GoldParser
 {
-    //
-    // Action Types
-    //
     #define ActionShift 1
     #define ActionReduce 2
     #define ActionGoto 3
     #define ActionAccept 4
-
-    //////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////
-    //
-    // Scanner functions
-    //
-    //////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////
-
-    // Default scanner match function
     char Parser::def_matchtoken(short type)
     {
         short c;
         switch (type)
         {
-        case SymbolTypeCommentStart: // /* */
+        case SymbolTypeCommentStart:
             while ((c = get_char()) != EEOF)
             {
                 if (c == '*')
@@ -49,9 +36,9 @@ namespace GoldParser
                 }
                 next_char();
             }
-            m_Symbol = 0; // eof
+            m_Symbol = 0;
             return 0;
-        case SymbolTypeCommentLine: // ;
+        case SymbolTypeCommentLine:
         {
             std::ostringstream currentLineComment;
             currentLineComment << "//";
@@ -81,7 +68,7 @@ namespace GoldParser
                 currentLineComment << static_cast<char>(c);
                 next_char();
             }
-            m_Symbol = 0; // eof
+            m_Symbol = 0;
             if (m_ParserCallbacks)
                 m_ParserCallbacks->OnLineComment(currentLineComment.str());
             return 0;
@@ -92,8 +79,6 @@ namespace GoldParser
             return 1;
         }
     }
-
-    // Get the next character from the input stream
     char Parser::get_eof()
     {
         struct ParseInput* pinput = &m_Input;
@@ -101,8 +86,6 @@ namespace GoldParser
             pinput->cbneedinput(pinput);
         return (pinput->nofs >= pinput->ncount) ? 1 : 0;
     }
-
-    // Get the next character from the input stream
     short Parser::get_char()
     {
         if (m_Input.buf[m_Input.nofs] == '\n'
@@ -116,17 +99,11 @@ namespace GoldParser
         }
         return get_eof() ? EEOF : m_Input.buf[m_Input.nofs];
     }
-
-    // Get the next character from the input stream
     void Parser::next_char()
     {
         if (m_Input.nofs < m_Input.ncount)
             m_Input.nofs++;
     }
-
-    //
-    // Scan input for next token
-    //
     short Parser::scan()
     {
         const ParseConfig* pconfig = ParseConfig::instance;
@@ -137,7 +114,6 @@ namespace GoldParser
         char* lexeme = m_Lexeme;
         m_Lexeme[0] = 0;
         int start_ofs = pinput->nofs;
-        // check for eof
         m_Input.bpreserve = 0;
         if (get_eof())
             return 0;
@@ -148,17 +124,11 @@ namespace GoldParser
 
         while (true)
         {
-
-            // get char from input stream
             m_Input.bpreserve = (last_accepted == -1) ? 0 : 1;
             c = get_char();
             m_Input.bpreserve = 0;
-
-            // convert to lower case
             if (!pconfig->case_sensitive && c != EEOF)
                 c = static_cast<short>(tolower(c));
-
-            // look for a matching edge
             if (c != EEOF)
             {
                 nedge = dfa->nedge;
@@ -180,7 +150,6 @@ namespace GoldParser
             }
             if ((c == EEOF) || (i == nedge))
             {
-                // accept, ignore or invalid token
                 if (last_accepted != -1)
                 {
                     m_Lexeme[last_accepted_size] = 0;
@@ -188,7 +157,6 @@ namespace GoldParser
                     {
                         if (!def_matchtoken(pconfig->sym[index].Type))
                         {
-                            // ignore, reset state
                             lexeme = m_Lexeme;
                             lexeme[0] = 0;
                             if (c == EEOF || (last_accepted == -1))
@@ -202,13 +170,10 @@ namespace GoldParser
                 }
                 break;
             }
-
-            // move to next character
             next_char();
         }
         if (last_accepted == -1)
         {
-            // invalid
             lexeme = m_Lexeme;
             lexeme[0] = 0;
             if (get_eof())
@@ -216,21 +181,8 @@ namespace GoldParser
             return -1;
         }
         m_CurrentPosition = m_Input.nofs - last_accepted_size;
-        // accept
         return last_accepted;
     }
-
-    //////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////
-    //
-    // Parser functions
-    //
-    //////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////
-
-    //
-    // Create a new parser
-    //
     Parser::Parser()
     {
         m_NStackSize = STACK_SIZE;
@@ -239,34 +191,20 @@ namespace GoldParser
         m_Lexeme[0] = '\0';
         m_Input.parser = this;
         m_Tokens.reserve(TOKEN_SIZE);
-
-        // Reduction Tree
-        m_RtOfs = 1; // 0 is reserved as head
+        m_RtOfs = 1;
         m_RtSize = RT_BUFF_SIZE;
         m_Rt.resize(m_RtSize);
-        // End Reduction Tree
     }
-
-    //
-    // delete the parser state
-    //
     Parser::~Parser()
     {
         while (!m_Tokens.empty())
             _pop_token();
-
-        // Reduction Tree
         for (int i = 0; i < m_RtOfs; ++i)
         {
             if (m_Rt[i].rtchildren)
                 free(m_Rt[i].rtchildren);
         }
-        // End Reduction Tree
     }
-
-    //
-    // Load a parse table from a file
-    //
 
     
 
@@ -303,13 +241,8 @@ namespace GoldParser
         free(buf);
     }
 
-    //
-    // Reduction Tree
-    //
-
     short Parser::_push_rt_element(const StackElement& se)
     {
-        // Check and grow rt buffer if necessary
         if (m_RtOfs >= m_RtSize)
         {
             m_RtSize += RT_BUFF_SIZE;
@@ -318,7 +251,6 @@ namespace GoldParser
         m_Rt[m_RtOfs] = se;
         if (se.rtchildren)
         {
-            // Only copy essential part of rt index buff
             m_Rt[m_RtOfs].rtchildren = (short*)malloc(sizeof(short) * se.rtchildofs);
             memcpy((void*)m_Rt[m_RtOfs].rtchildren, se.rtchildren, sizeof(short) * se.rtchildofs);
             m_Rt[m_RtOfs].nrtchild = se.nrtchild;
@@ -353,10 +285,6 @@ namespace GoldParser
             rt.rtchildofs = 0;
         }
     }
-
-    //
-    // Helper functions for loading .cgt file
-    //
     char* getws(char* b, char* s)
     {
         while (b && (*b || *(b + 1)))
@@ -406,9 +334,6 @@ namespace GoldParser
         instance = this;
         InitializeFromMemory(b, len);
     }
-    //
-    // Load a parse table from memory
-    //
     void ParseConfig::InitializeFromMemory(char* b, size_t len)
     {
         char str[1024];
@@ -427,48 +352,35 @@ namespace GoldParser
         }
 
         bend = b + len;
-
-        // get header
         b = getws(b, str);
-
-        // check header
         if (strcmp(str, "GOLD Parser Tables/v1.0"))
             std::cerr << "Can't read buffer; old tables";
-
-        // create parser object
-        // read records until eof
         std::vector<unsigned char> recTypeDebugStack;
         while (b < bend)
         {
-            b++; // skip record id
-
-            // read number of entries in record
+            b++;
             b = getsh(b, &nEntries);
-
-            // read record type
             b = getvb(b, &recType);
 
             recTypeDebugStack.push_back(recType);
             switch (recType)
             {
-            case 'P':                              // Parameters
-                b = skipvws(b);                    // Name
-                b = skipvws(b);                    // Version
-                b = skipvws(b);                    // Author
-                b = skipvws(b);                    // About
-                b = getvb(b, &byt);                // Case Sensitive?
-                b = getvsh(b, &res->start_symbol); // Start Symbol
+            case 'P':
+                b = skipvws(b);
+                b = skipvws(b);
+                b = skipvws(b);
+                b = skipvws(b);
+                b = getvb(b, &byt);
+                b = getvsh(b, &res->start_symbol);
                 res->case_sensitive = byt ? 1 : 0;
                 break;
-            case 'T': // Table Counts
+            case 'T':
             {
                 b = getvsh(b, &res->nsym);
                 b = getvsh(b, &res->ncharset);
                 b = getvsh(b, &res->nrule);
                 b = getvsh(b, &res->ndfa_state);
                 b = getvsh(b, &res->nlalr_state);
-
-                // reserve memory
                 res->charset = (const char**)malloc(sizeof(char*) * res->ncharset);
                 res->dfa_state = (struct DfaState*)malloc(sizeof(struct DfaState) * res->ndfa_state);
                 res->sym = (struct Symbol*)malloc(sizeof(struct Symbol) * res->nsym);
@@ -476,11 +388,11 @@ namespace GoldParser
                 res->lalr_state = (struct LalrState*)malloc(sizeof(struct LalrState) * res->nlalr_state);
             }
             break;
-            case 'I': // Initial States
+            case 'I':
                 b = getvsh(b, &res->init_dfa);
                 b = getvsh(b, &res->init_lalr);
                 break;
-            case 'S': // Symbol Entry
+            case 'S':
             {
                 b = getvsh(b, &idx);
                 b = getvws(b, str);
@@ -488,40 +400,40 @@ namespace GoldParser
                 res->sym[idx].Name = _strdup(str);
             }
             break;
-            case 'C': // Character set Entry
+            case 'C':
             {
                 b = getvsh(b, &idx);
                 b = getvws(b, str);
                 res->charset[idx] = _strdup(str);
             }
             break;
-            case 'R': // Rule Table Entry
+            case 'R':
                 b = getvsh(b, &idx);
                 b = getvsh(b, &res->rule[idx].NonTerminal);
-                b++; // reserved
+                b++;
                 res->rule[idx].nsymbol = nEntries - 4;
                 res->rule[idx].symbol = (short*)malloc(sizeof(short) * (nEntries - 4));
                 for (i = 0; i < nEntries - 4; i++)
                     b = getvsh(b, &res->rule[idx].symbol[i]);
                 break;
-            case 'D': // DFA State Entry
+            case 'D':
                 b = getvsh(b, &idx);
                 b = getvb(b, &byt);
                 b = getvsh(b, &res->dfa_state[idx].AcceptIndex);
                 res->dfa_state[idx].Accept = byt ? 1 : 0;
-                b++; // reserved
+                b++;
                 res->dfa_state[idx].nedge = (nEntries - 5) / 3;
                 res->dfa_state[idx].edge = (struct Edge*)malloc(sizeof(struct Edge) * ((nEntries - 5) / 3));
                 for (i = 0; i < nEntries - 5; i += 3)
                 {
                     b = getvsh(b, &res->dfa_state[idx].edge[i / 3].CharSetIndex);
                     b = getvsh(b, &res->dfa_state[idx].edge[i / 3].TargetIndex);
-                    b++; // reserved
+                    b++;
                 }
                 break;
-            case 'L': // LALR State Entry
+            case 'L':
                 b = getvsh(b, &idx);
-                b++; // reserved
+                b++;
                 res->lalr_state[idx].naction = (nEntries - 3) / 4;
                 res->lalr_state[idx].m_Action = (struct Action*)malloc(sizeof(struct Action) * ((nEntries - 3) / 4));
                 for (i = 0; i < nEntries - 3; i += 4)
@@ -529,19 +441,15 @@ namespace GoldParser
                     b = getvsh(b, &res->lalr_state[idx].m_Action[i / 4].m_SymbolIndex);
                     b = getvsh(b, &res->lalr_state[idx].m_Action[i / 4].m_Action);
                     b = getvsh(b, &res->lalr_state[idx].m_Action[i / 4].m_Target);
-                    b++; // reserved
+                    b++;
                 }
                 break;
 
-            default: // unknown record
+            default:
                 std::cerr << "Unknown record";
             }
         }
     }
-
-    //
-    // Free parser
-    //
     ParseConfig* ParseConfig::instance;
 
     ParseConfig::~ParseConfig()
@@ -564,10 +472,6 @@ namespace GoldParser
         free(lalr_state);
         instance = nullptr;
     }
-
-    //
-    // Pop an element from the stack
-    //
     void Parser::_pop_stack()
     {
         if (m_NStack < 1)
@@ -586,13 +490,8 @@ namespace GoldParser
             top.rtchildofs = 0;
         }
     }
-
-    //
-    // Push an element onto the parse stack
-    //
     void Parser::_push_stack(short symValue, const Symbol* sym, short* rtIdx, short nrtIdx)
     {
-        // Check and grow parser stack if necessary
         if ((m_NStack + 1) >= m_NStackSize)
         {
             m_NStackSize += STACK_SIZE;
@@ -616,10 +515,6 @@ namespace GoldParser
             se.rtchildofs = nrtIdx;
         }
     }
-
-    //
-    // Push a token onto the token input stack
-    //
     void Parser::_push_token(short symbol, const char* lexeme, SourceLocation location)
     {
         m_Tokens.resize(m_Tokens.size() + 1);
@@ -627,36 +522,19 @@ namespace GoldParser
         m_Tokens.back().lexeme = lexeme ? _strdup(lexeme) : nullptr;
         m_Tokens.back().location = location;
     }
-
-    //
-    // Pop a token from the token input stack
-    //
     void Parser::_pop_token()
     {
         if (m_Tokens.empty())
             return;
         m_Tokens.pop_back();
     }
-
-    //
-    // This function is called when the scanner needs more data
-    //
-    // If the pinput->bpreserve flag is set(because the scanner may need to backtrack), then the data in the current input buffer must be preserved.
-    // This is done by increasing the buffer size and copying the old data to the new buffer.
-    // If the pinput->bpreserve flag is not set, the new data can be copied over the existing buffer.
-    //
-    // If the input buffer is empty after this callback returns(because no more data was added), the scanner function will return either:
-    //   1] the last accepted token
-    //   2] an eof, if no token has been accepted yet
-    //
     void cbgetinput(ParseInput* pinput)
     {
         if (pinput->ncount == 0)
         {
-            // TODO read everything at once
             int nr = static_cast<int>(fread(pinput->buf, 1, pinput->nbufsize, pinput->inputFile));
-            pinput->nofs = 0;    // reset the offset
-            pinput->ncount = nr; // set the character count
+            pinput->nofs = 0;
+            pinput->ncount = nr;
         }
     }
 
@@ -675,8 +553,8 @@ namespace GoldParser
         m_Input.cbneedinput = cbgetinput;
 
         int nr = static_cast<int>(fread(m_Input.buf, 1, m_Input.nbufsize, m_Input.inputFile));
-        m_Input.nofs = 0;    // reset the offset
-        m_Input.ncount = nr; // set the character count
+        m_Input.nofs = 0;
+        m_Input.ncount = nr;
 
         m_Input.buf[m_Input.nbufsize] = 0;
     }
@@ -694,30 +572,21 @@ namespace GoldParser
             int nrtIdx = 0;
 
             m_Symbol = rule->NonTerminal;
-
-            // push onto token stack
             _push_token(m_Symbol);
 
             if (rule->nsymbol)
             {
-                // remove terminals from stack
                 nrtIdx = rule->nsymbol;
                 rtIdx = (short*)malloc(sizeof(short) * nrtIdx);
                 for (i = 0; i < rule->nsymbol; i++)
                 {
-                    // Push element onto reduction tree
                     rtIdx[i] = _push_rt_element(m_Stack[m_NStack - 1]);
                     _pop_stack();
                 }
-
-                // revert lalr_state
                 m_LalrState = m_Stack[m_NStack].state;
             }
-            // get symbol information
             if (m_Symbol < ParseConfig::instance->nsym)
                 sym = &ParseConfig::instance->sym[m_Symbol];
-
-            // push non-terminal onto stack
             _push_stack(rule->NonTerminal, sym, rtIdx, static_cast<short>(nrtIdx));
 
             _set_rt_head(m_Stack[m_NStack - 1]);
@@ -729,12 +598,10 @@ namespace GoldParser
         {
             if (m_Tokens.empty())
             {
-                // No input tokens on stack, grab one from the input stream
                 if ((m_Symbol = scan()) < 0)
                     return -1;
                 _push_token(m_Symbol, m_Lexeme, {m_CurrentLine, m_CurrentPosition});
             }
-            // Retrieve the last token from the input stack
             else
             {
                 m_Symbol = m_Tokens.back().id;
@@ -761,36 +628,19 @@ namespace GoldParser
                     {
                     case ActionShift:
                     {
-                        //
-                        // Push a symbol onto the stack
-                        //
                         const Symbol* sym{};
                         if (m_Symbol < ParseConfig::instance->nsym)
                             sym = &ParseConfig::instance->sym[m_Symbol];
-
-                        // push symbol onto stack
                         _push_stack(m_Symbol, sym, nullptr, 0);
 
                         m_NStackOfs = m_NStack - 1;
                         m_LalrState = action->m_Target;
-
-                        // pop token from stack
                         _pop_token();
                     }
                     break;
 
                     case ActionReduce:
                     {
-
-                        //
-                        // Reducing a rule is done in two steps:
-                        // 1] Setup the stack offset so the calling function
-                        //    can reference the rule's child lexeme values when
-                        //    this action returns
-                        // 2] When this function is called again, we will
-                        //    remove the child lexemes from the stack, and replace
-                        //    them with an element representing this reduction
-                        //
                         struct Rule* rule = &ParseConfig::instance->rule[action->m_Target];
                         m_Lexeme[0] = '\0';
                         m_ReduceRule = action->m_Target;
@@ -800,35 +650,30 @@ namespace GoldParser
                     }
 
                     case ActionGoto:
-                        // Shift states
                         m_LalrState = action->m_Target;
                         _pop_token();
                         break;
 
                     case ActionAccept:
-                        // Eof, the main rule has been accepted
                         return 0;
                     default:
                         break;
 
-                    } // switch
-                }     // if
-            }         // for
+                    }
+                }
+            }
             if (!bfound)
             {
                 if (m_Symbol)
                     break;
-                return 0; // eof
+                return 0;
             }
-        } // while
-
-        // token not found in rule
+        }
         return -1;
     }
 
     void Parser::Next()
     {
-        // TODO: even faster if swapping pointers instead (or not depend on that)
         const char* lexeme = GetChildLexeme(0);
         if (lexeme)
         {
@@ -842,4 +687,4 @@ namespace GoldParser
         }
     }
 
-} // namespace GoldParser
+}

@@ -5,9 +5,6 @@
 
 namespace GoldParser
 {
-    //
-    // Symbol Types
-    //
     enum SymbolType
     {
         SymbolTypeNonterminal = 0,
@@ -19,10 +16,6 @@ namespace GoldParser
         SymbolTypeCommentLine = 6,
         SymbolTypeError = 7
     };
-
-    //
-    // Initial Buffer Sizes
-    //
     enum Constants
     {
         EEOF = 512,
@@ -32,10 +25,6 @@ namespace GoldParser
         RT_INDEX_SIZE = 32,
         LEXEM_SIZE = 2048
     };
-
-    //
-    // Callback function prototypes
-    //
     using _cbneedinput = void (*)(struct ParseInput* pconfig);
 
     struct SourceLocation {
@@ -134,11 +123,9 @@ namespace GoldParser
         Token token;
         short state;
         short rule;
-        // Reduction Tree
         short* rtchildren;
         short nrtchild;
         short rtchildofs;
-        // End Reduction Tree
     };
 
     struct ParseInput
@@ -162,12 +149,8 @@ namespace GoldParser
         char bpreserve{};
         FILE* inputFile{};
     };
-
-    // parser configuration
     struct ParseConfig
     {
-
-        // create from memory
         ParseConfig(char* buffer, int len);
         explicit ParseConfig(const char* filename);
         ParseConfig(const ParseConfig& parseConfig) = delete;
@@ -192,17 +175,11 @@ namespace GoldParser
         static ParseConfig* instance;
     };
 
-    //
-    // Reduction Tree functions
-    //
-
     struct ParserCallbacks
     {
-        virtual void OnLineComment(const std::string& /*comment*/) {}
+        virtual void OnLineComment(const std::string&) {}
     };
     #define BUILD_RT
-
-    // current parse info
     struct Parser
     {
         Parser();
@@ -216,24 +193,10 @@ namespace GoldParser
         const char* GetChildLexeme(int index) const { return m_Stack[m_NStackOfs + index].token.lexeme; }
         SourceLocation GetChildLocation(int index) const { return m_Stack[m_NStackOfs + index].token.location; }
         int get_column() const { return m_Input.nofs - m_LastCharOfs; }
-
-        //
-        // Scan/Parse functions
-        //
-
-        // default scanner match function
         char def_matchtoken(short type);
-
-        // check for eof on the input stream
         char get_eof();
-
-        // get the next character from the input stream
         short get_char();
-
-        // increment to next character in input stream
         void next_char();
-
-        // get the next token
         short scan();
 
         void _push_token(short symbol, const char* lexeme = nullptr, SourceLocation location = {});
@@ -243,10 +206,9 @@ namespace GoldParser
         void _pop_stack();
 
     #ifdef BUILD_RT
-        // Reduction Tree
         short _push_rt_element(const StackElement& se);
         void _set_rt_head(const StackElement& se);
-    #endif // BUILD_RT
+    #endif
 
         int m_CurrentLine{1};
         int m_CurrentPosition{1};
@@ -263,12 +225,9 @@ namespace GoldParser
         size_t m_NStackOfs{};
         ParseInput m_Input;
         std::vector<Token> m_Tokens;
-
-        // Reduction Tree
         std::vector<StackElement> m_Rt{};
         int m_RtSize{};
         int m_RtOfs{};
-        // End Reduction Tree
     };
 
-} // namespace GoldParser
+}

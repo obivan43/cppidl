@@ -32,7 +32,6 @@ namespace cppidl {
 			Enum(std::string_view name);
 
 			const auto& GetEntries() const { return m_EnumEntries; }
-			int GetEntriesAmount() const { return m_EnumEntries.size(); }
 			const EnumEntry& GetEntry(int index) const { return *m_EnumEntries[index]; }
 
 			void SetEnumImplementationType(std::string_view type) { m_EnumImplementationType = type; }
