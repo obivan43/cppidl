@@ -25,6 +25,7 @@
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\model\CppIDLElement.cpp" />
     <ClCompile Include="source\model\CppIDLEnum.cpp" />
+    <ClCompile Include="source\model\CppIDLFile.cpp" />
     <ClCompile Include="source\model\CppIDLVariant.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -32,6 +33,7 @@
     <ClInclude Include="source\cppidl\goldparser.h" />
     <ClInclude Include="source\model\CppIDLElement.h" />
     <ClInclude Include="source\model\CppIDLEnum.h" />
+    <ClInclude Include="source\model\CppIDLFile.h" />
     <ClInclude Include="source\model\CppIDLVariant.h" />
     <ClInclude Include="source\utils\utils.h" />
   </ItemGroup>

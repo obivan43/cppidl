@@ -3,6 +3,7 @@
 #include "goldparser.h"
 
 #include "../model/CppIDLEnum.h"
+#include "../model/CppIDLFile.h"
 
 #include <memory>
 
@@ -13,7 +14,7 @@ namespace cppidl {
 		public:
 			CppIDLParser();
 
-			void Parse();
+			void Parse(const char* fileName);
 
 		private:
 			void CreateEnum(const char* name);
@@ -29,6 +30,8 @@ namespace cppidl {
 			Enum* m_CurrentEnum;
 			int m_NextEnumValue;
 			std::vector<Enum*> m_ParsedEnums;
+
+			File* m_CurrentFile;
 
 			std::unique_ptr<GoldParser::ParseConfig> m_ParserConfig;
 			std::unique_ptr<GoldParser::Parser> m_Parser;

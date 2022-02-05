@@ -11,8 +11,10 @@ namespace cppidl {
 		m_Parser = std::make_unique<GoldParser::Parser>();
 	}
 
-	void CppIDLParser::Parse() {
-		m_Parser->OpenFile("data/test.cppidl");
+	void CppIDLParser::Parse(const char* fileName) {
+		m_CurrentFile = new File(fileName);
+
+		m_Parser->OpenFile(fileName);
 		while (true) {
 			short res = m_Parser->Parse();
 
@@ -90,7 +92,7 @@ namespace cppidl {
 	void CppIDLParser::CreateEnum(const char* name) {
 		std::string enumName(name);
 		assert(!enumName.empty());
-		m_CurrentEnum = new Enum(enumName);
+		m_CurrentEnum = new Enum(enumName, m_CurrentFile);
 	}
 
 	void CppIDLParser::CreateEnumEntry(int value, bool isHex, bool userSpecified) {
@@ -116,19 +118,23 @@ namespace cppidl {
 
 	void CppIDLParser::CreateEnumEntryInternal(EnumEntry* enumEntry) {
 		assert(m_CurrentEnum);
-		m_CurrentEnum->AddEnumEntry(enumEntry);
-		m_NextEnumValue = enumEntry->GetValue().GetInt() + 1;
+
+		if (m_CurrentEnum->AddEnumEntry(enumEntry)) {
+
+			EnumConstant enumConstant{ enumEntry->GetValue().GetInt(), m_CurrentEnum };
+			m_CurrentFile->AddConstant(enumEntry->GetName(), enumConstant);
+
+			m_NextEnumValue = enumEntry->GetValue().GetInt() + 1;
+		}
 	}
 
 	void CppIDLParser::PrintEnums() {
-		
 		for (Enum* parsedEnum : m_ParsedEnums) {
 			std::cout << parsedEnum->GetName() << '\n';
 			for (EnumEntry* enumEntry : parsedEnum->GetEntries()) {
 				std::cout << enumEntry->GetName() << " = " << enumEntry->GetValue() << '\n';
 			}
 		}
-
 	}
 
 }

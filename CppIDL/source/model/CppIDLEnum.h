@@ -4,10 +4,14 @@
 #include "CppIDLElement.h"
 
 #include <vector>
+#include <utility>
 
 namespace cppidl {
 
 	class Enum;
+	class File;
+
+	typedef std::pair<int, Enum*> EnumConstant;
 
 	class EnumEntry : public Element {
 
@@ -29,14 +33,14 @@ namespace cppidl {
 	class Enum : public Element {
 
 		public:
-			Enum(std::string_view name);
+			Enum(std::string_view name, cppidl::File* file);
 
 			const auto& GetEntries() const { return m_EnumEntries; }
 			const EnumEntry& GetEntry(int index) const { return *m_EnumEntries[index]; }
 
 			void SetEnumImplementationType(std::string_view type) { m_EnumImplementationType = type; }
 
-			void AddEnumEntry(EnumEntry* enumEntry);
+			bool AddEnumEntry(EnumEntry* enumEntry);
 
 		private:
 			std::vector<EnumEntry*> m_EnumEntries;

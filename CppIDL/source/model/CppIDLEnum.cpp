@@ -1,4 +1,5 @@
 #include "CppIDLEnum.h"
+#include "CppIDLFile.h"
 #include "../utils/utils.h"
 
 #include <iostream>
@@ -9,19 +10,23 @@ namespace cppidl {
 		SetName(name);
 	}
 
-	Enum::Enum(std::string_view name) : Element(ElementType::Enum) {
+	Enum::Enum(std::string_view name, cppidl::File* file) : Element(ElementType::Enum) {
 		SetName(name);
+
+		if(file != nullptr)
+			file->m_Enums.push_back(this);
 	}
 
-	void Enum::AddEnumEntry(EnumEntry* enumEntry) {
+	bool Enum::AddEnumEntry(EnumEntry* enumEntry) {
 		static auto hasName = [](const Element* e, std::string_view name) { return e->GetName() == name; };
 
 		if (auto* prev = FirstOrNull(m_EnumEntries, hasName, enumEntry->GetName())) {
 			std::cerr << "Duplicated enum entry" << std::endl;
-			return;
+			return false;
 		}
 
 		m_EnumEntries.push_back(enumEntry);
+		return true;
 	}
 
 }
