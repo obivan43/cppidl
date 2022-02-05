@@ -1,0 +1,8 @@
+enum TestEnum
+{
+    FirstValue = 0,
+    SecondValue = -10,
+    ThirdValue,
+    FourthValue = 0x4a1,
+    FifthValue
+}

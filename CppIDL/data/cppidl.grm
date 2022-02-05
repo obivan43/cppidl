@@ -1,0 +1,68 @@
+"Case Sensitive" = 'True'
+"Start Symbol" = <File>
+Comment Line = '//'
+Comment Start = '/*'
+Comment End = '*/'
+
+{Hex Digit}      = {Digit} + [abcdefABCDEF]
+{Oct Digit}      = [01234567]
+{Char Ch}        = {Printable} - ['']
+{String Ch}      = {Printable} - ["\]
+{Letter2}        = {Letter} + [_]
+{Alphanumeric2}  = {Alphanumeric} + [_]
+
+Identifier       = {Letter2}{Alphanumeric2}*
+DecNumber        = {digit}+
+HexNumber        = 0x{Hex Digit}+
+String           = '"' ( {String Ch} | '\'{Printable} )* '"'
+CodeString       = ('C' | 'c') '"' ( {String Ch} | '\'{Printable} )* '"'
+
+<LineCapture> ::=
+               
+<OptionalSemiColon> ::= ';'
+                      |
+                      
+<TypeIdentifier>   ::= <ScopedIdentifier>
+                    
+<ScopedIdentifier> ::= Identifier
+                     | Identifier '::' <ScopedIdentifier>
+                             
+<File> ::= <File> <Statement>
+         |
+         
+<Statement> ::= <TypeDeclaration>
+              | <TypeForwardDeclaration>
+              
+<TypeDeclaration> ::= <EnumDeclaration>
+
+<TypeForwardDeclaration> ::= enum <LineCapture> <ScopedIdentifier> <OptionalSemiColon>
+                          
+<EnumDeclaration> ::= enum <EnumDeclarationIdentifier> <EnumTypeSpecification> '{' <EnumValues> '}' <OptionalSemiColon>
+                   
+<EnumDeclarationIdentifier> ::= <LineCapture> Identifier
+                          
+<EnumTypeSpecification> ::= ':' <TypeIdentifier>
+                          |
+                          
+<EnumValues> ::= <EnumValue> ',' <EnumValues>
+               | <EnumValue>
+
+<EnumValue> ::= <LineCapture> Identifier
+              | <LineCapture> Identifier '=' <SignedNumber>
+              | <LineCapture> Identifier '=' <EnumCombinaison>
+              | <LineCapture> Identifier '=' <EnumValueCode>
+              
+<EnumCombinaison> ::= <EnumCombinaison> '|' <Enum>
+                    | <EnumCombinaison> '+' <SignedNumber>
+                    | <Enum>
+                    
+<Enum> ::= <ScopedIdentifier>
+
+<EnumValueCode> ::= String
+                  | CodeString
+                  
+<SignedNumber> ::= '-' <UnsignedNumber>
+                 | <UnsignedNumber>
+                 
+<UnsignedNumber> ::= DecNumber
+                   | HexNumber
