@@ -169,11 +169,8 @@ namespace cppidl {
 		m_CurrentValue = Variant();
 		m_NextEnumValue = 0;
 
-		if (m_CurrentEnum)
-			delete m_CurrentEnum;
-
-		if (m_CurrentFile)
-			delete m_CurrentFile;
+		delete m_CurrentEnum;
+		delete m_CurrentFile;
 		
 		m_ParsedEnums.clear();
 	}
