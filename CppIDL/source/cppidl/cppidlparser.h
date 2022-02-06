@@ -9,12 +9,19 @@
 
 namespace cppidl {
 
+	enum class CppIDLParserState {
+		CppIDLParserState_Ok,
+		CppIDLParserState_SyntaxError,
+		CppIDLParserState_EnumError,
+		CppIDLParserState_EnumEntryError
+	};
+
 	class CppIDLParser {
 
 		public:
 			CppIDLParser();
 
-			void Parse(const char* fileName);
+			CppIDLParserState Parse(const char* fileName);
 
 		private:
 			void CreateEnum(const char* name);
@@ -22,10 +29,13 @@ namespace cppidl {
 			void CreateEnumEntry(const Variant& value);
 			void CreateEnumEntryInternal(EnumEntry* enumEntry);
 
+			void Reset();
+
 			void PrintEnums();
 
 		private:
 			Variant m_CurrentValue;
+			CppIDLParserState m_ParserState;
 
 			Enum* m_CurrentEnum;
 			int m_NextEnumValue;

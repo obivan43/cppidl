@@ -28,4 +28,6 @@ namespace cppidl {
 			std::string m_Name;
 	};
 
+	static bool ElementHasSameName(const Element* e, std::string_view name) { return e->GetName() == name; };
+
 }

@@ -10,18 +10,13 @@ namespace cppidl {
 		SetName(name);
 	}
 
-	Enum::Enum(std::string_view name, cppidl::File* file) : Element(ElementType::Enum) {
+	Enum::Enum(std::string_view name) : Element(ElementType::Enum) {
 		SetName(name);
-
-		if(file != nullptr)
-			file->m_Enums.push_back(this);
 	}
 
 	bool Enum::AddEnumEntry(EnumEntry* enumEntry) {
-		static auto hasName = [](const Element* e, std::string_view name) { return e->GetName() == name; };
-
-		if (auto* prev = FirstOrNull(m_EnumEntries, hasName, enumEntry->GetName())) {
-			std::cerr << "Duplicated enum entry" << std::endl;
+		if (auto* prev = FirstOrNull(m_EnumEntries, ElementHasSameName, enumEntry->GetName())) {
+			std::cerr << "Duplicated enum entry error" << std::endl;
 			return false;
 		}
 

@@ -21,6 +21,7 @@ namespace cppidl {
 
 			bool HasEnums() const { return !m_Enums.empty(); }
 
+			bool AddEnum(Enum* enumInfo);
 			void AddConstant(std::string_view name, cppidl::EnumConstant& enumConstant);
 
 		private:

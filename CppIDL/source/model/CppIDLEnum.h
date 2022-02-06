@@ -33,7 +33,7 @@ namespace cppidl {
 	class Enum : public Element {
 
 		public:
-			Enum(std::string_view name, cppidl::File* file);
+			Enum(std::string_view name);
 
 			const auto& GetEntries() const { return m_EnumEntries; }
 			const EnumEntry& GetEntry(int index) const { return *m_EnumEntries[index]; }

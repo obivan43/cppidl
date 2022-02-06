@@ -6,12 +6,13 @@
 
 namespace cppidl {
 
-	CppIDLParser::CppIDLParser() : m_CurrentEnum(nullptr), m_NextEnumValue(0) {
+	CppIDLParser::CppIDLParser() : m_ParserState(CppIDLParserState::CppIDLParserState_Ok), m_CurrentEnum(nullptr), m_NextEnumValue(0) {
 		m_ParserConfig = std::make_unique<GoldParser::ParseConfig>("data/cppidl_enum.cgt");
 		m_Parser = std::make_unique<GoldParser::Parser>();
 	}
 
-	void CppIDLParser::Parse(const char* fileName) {
+	CppIDLParserState CppIDLParser::Parse(const char* fileName) {
+		m_ParserState = CppIDLParserState::CppIDLParserState_Ok;
 		m_CurrentFile = new File(fileName);
 
 		m_Parser->OpenFile(fileName);
@@ -21,8 +22,16 @@ namespace cppidl {
 			if (res == SYM_FILE)
 				continue;
 
-			if (res == -1 || res == SYM_EOF)
+			if (res == SYM_EOF) 
 				break;
+
+			if (res == -1) {
+				Reset();
+
+				m_ParserState = CppIDLParserState::CppIDLParserState_SyntaxError;
+				std::cerr << "Syntax error" << '\n';
+				break;
+			}
 
 			switch (m_Parser->m_ReduceRule)
 			{
@@ -83,16 +92,32 @@ namespace cppidl {
 				break;
 			}
 
+			if (m_ParserState != CppIDLParserState::CppIDLParserState_Ok) {
+				Reset();
+				break;
+			}
+
 			m_Parser->Next();
 		}
 
-		PrintEnums();
+		if (m_ParserState == CppIDLParserState::CppIDLParserState_Ok) {
+			PrintEnums();
+		}
+
+		return m_ParserState;
 	}
 
 	void CppIDLParser::CreateEnum(const char* name) {
 		std::string enumName(name);
+
 		assert(!enumName.empty());
-		m_CurrentEnum = new Enum(enumName, m_CurrentFile);
+		assert(m_CurrentFile);
+
+		m_CurrentEnum = new Enum(enumName);
+
+		if (!m_CurrentFile->AddEnum(m_CurrentEnum)) {
+			m_ParserState = CppIDLParserState::CppIDLParserState_EnumError;
+		}
 	}
 
 	void CppIDLParser::CreateEnumEntry(int value, bool isHex, bool userSpecified) {
@@ -119,13 +144,16 @@ namespace cppidl {
 	void CppIDLParser::CreateEnumEntryInternal(EnumEntry* enumEntry) {
 		assert(m_CurrentEnum);
 
-		if (m_CurrentEnum->AddEnumEntry(enumEntry)) {
-
-			EnumConstant enumConstant{ enumEntry->GetValue().GetInt(), m_CurrentEnum };
-			m_CurrentFile->AddConstant(enumEntry->GetName(), enumConstant);
-
-			m_NextEnumValue = enumEntry->GetValue().GetInt() + 1;
+		if (!m_CurrentEnum->AddEnumEntry(enumEntry)) {
+			m_ParserState = CppIDLParserState::CppIDLParserState_EnumEntryError;
+			delete enumEntry;
+			return;
 		}
+
+		EnumConstant enumConstant{ enumEntry->GetValue().GetInt(), m_CurrentEnum };
+		m_CurrentFile->AddConstant(enumEntry->GetName(), enumConstant);
+
+		m_NextEnumValue = enumEntry->GetValue().GetInt() + 1;
 	}
 
 	void CppIDLParser::PrintEnums() {
@@ -135,6 +163,19 @@ namespace cppidl {
 				std::cout << enumEntry->GetName() << " = " << enumEntry->GetValue() << '\n';
 			}
 		}
+	}
+
+	void CppIDLParser::Reset() {
+		m_CurrentValue = Variant();
+		m_NextEnumValue = 0;
+
+		if (m_CurrentEnum)
+			delete m_CurrentEnum;
+
+		if (m_CurrentFile)
+			delete m_CurrentFile;
+		
+		m_ParsedEnums.clear();
 	}
 
 }
