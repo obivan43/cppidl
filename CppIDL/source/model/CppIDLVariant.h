@@ -8,10 +8,10 @@
 namespace cppidl {
 
 	enum class VariantType {
-		EmptyType,
-		IntType,
-		UnsignedInt64Type,
-		Count
+		VariantType_EmptyType,
+		VariantType_IntType,
+		VariantType_UnsignedInt64Type,
+		VariantType_Count
 	};
 
 	class Variant {
@@ -19,8 +19,8 @@ namespace cppidl {
 		public:
 			Variant() = default;
 
-			bool IsEmpty() const { return m_Type == VariantType::EmptyType; }
-			bool IsInt() const { return m_Type == VariantType::IntType; }
+			bool IsEmpty() const { return m_Type == VariantType::VariantType_EmptyType; }
+			bool IsInt() const { return m_Type == VariantType::VariantType_IntType; }
 
 			VariantType GetType() const { return m_Type; }
 			bool GetIsSigned() const { return m_IsSigned; }
@@ -32,38 +32,38 @@ namespace cppidl {
 			}
 
 			unsigned int GetUnsignedInt() const {
-				assert(IsInt() || m_Type == VariantType::UnsignedInt64Type);
+				assert(IsInt() || m_Type == VariantType::VariantType_UnsignedInt64Type);
 				return m_IntValue;
 			}
 
 			std::uint64_t GetUnsignedInt64() const {
-				assert(m_Type == VariantType::UnsignedInt64Type);
+				assert(m_Type == VariantType::VariantType_UnsignedInt64Type);
 				return m_UnsignedInt64Value;
 			}
 
 			void SetInt(int value) {
 				m_IntValue = value;
-				m_Type = VariantType::IntType;
+				m_Type = VariantType::VariantType_IntType;
 				m_WasIntHexa = false;
 				m_IsSigned = true;
 			}
 
 			void SetUnsignedInt(unsigned int value) {
 				m_IntValue = value;
-				m_Type = VariantType::IntType;
+				m_Type = VariantType::VariantType_IntType;
 				m_WasIntHexa = false;
 				m_IsSigned = false;
 			}
 
 			void SetHexInt(unsigned int value) {
 				m_IntValue = value;
-				m_Type = VariantType::IntType;
+				m_Type = VariantType::VariantType_IntType;
 				m_WasIntHexa = true;
 			}
 
 			void SetHexInt(std::uint64_t value) {
 				m_UnsignedInt64Value = value;
-				m_Type = VariantType::UnsignedInt64Type;
+				m_Type = VariantType::VariantType_UnsignedInt64Type;
 				m_WasIntHexa = true;
 			}
 
@@ -86,7 +86,7 @@ namespace cppidl {
 				int m_IntValue;
 				std::uint64_t m_UnsignedInt64Value{ 0 };
 			};
-			VariantType m_Type{ VariantType::EmptyType };
+			VariantType m_Type{ VariantType::VariantType_EmptyType };
 			bool m_IsSigned;
 			bool m_WasIntHexa;
 	};

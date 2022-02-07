@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+  <Type Name="cppidl::Enum">
+    <DisplayString> {m_Name} </DisplayString>
+  </Type>
+  
+  <Type Name="cppidl::EnumEntry">
+    <DisplayString> {m_Name} </DisplayString>
+  </Type>
+
+  <Type Name="cppidl::File">
+    <DisplayString> {m_FileName} </DisplayString>
+  </Type>
+
+</AutoVisualizer>

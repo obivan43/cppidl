@@ -75,4 +75,9 @@
       <Filter>data</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="source\model\cppidl.natvis">
+      <Filter>source\model</Filter>
+    </Natvis>
+  </ItemGroup>
 </Project>

@@ -5,9 +5,9 @@
 namespace cppidl {
 
 	enum class ElementType {
-		Enum,
-		EnumEntry,
-		Count
+		ElementType_Enum,
+		ElementType_EnumEntry,
+		ElementType_Count
 	};
 
 	class Element {

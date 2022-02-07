@@ -41,6 +41,9 @@
     <None Include="data\cppidl_enum.grm" />
     <None Include="data\test.cppidl" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="source\model\cppidl.natvis" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
