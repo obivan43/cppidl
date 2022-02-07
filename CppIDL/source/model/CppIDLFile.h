@@ -6,6 +6,8 @@
 
 namespace cppidl {
 
+	typedef std::pair<int, Enum*> EnumConstant;
+
 	class File {
 
 		public:

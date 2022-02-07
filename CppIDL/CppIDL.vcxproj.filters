@@ -43,6 +43,9 @@
     <ClCompile Include="source\model\CppIDLFile.cpp">
       <Filter>source\model</Filter>
     </ClCompile>
+    <ClCompile Include="source\model\CppIDLEnumEntry.cpp">
+      <Filter>source\model</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\model\CppIDLVariant.h">
@@ -64,6 +67,9 @@
       <Filter>source\utils</Filter>
     </ClInclude>
     <ClInclude Include="source\model\CppIDLFile.h">
+      <Filter>source\model</Filter>
+    </ClInclude>
+    <ClInclude Include="source\model\CppIDLEnumEntry.h">
       <Filter>source\model</Filter>
     </ClInclude>
   </ItemGroup>

@@ -26,57 +26,15 @@ namespace cppidl {
 			bool GetIsSigned() const { return m_IsSigned; }
 			bool GetWasHexa() const { return m_WasIntHexa; }
 
-			int GetInt() const {
-				assert(IsInt());
-				return m_IntValue;
-			}
+			int GetInt() const;
+			unsigned int GetUnsignedInt() const;
+			std::uint64_t GetUnsignedInt64() const;
 
-			unsigned int GetUnsignedInt() const {
-				assert(IsInt() || m_Type == VariantType::VariantType_UnsignedInt64Type);
-				return m_IntValue;
-			}
-
-			std::uint64_t GetUnsignedInt64() const {
-				assert(m_Type == VariantType::VariantType_UnsignedInt64Type);
-				return m_UnsignedInt64Value;
-			}
-
-			void SetInt(int value) {
-				m_IntValue = value;
-				m_Type = VariantType::VariantType_IntType;
-				m_WasIntHexa = false;
-				m_IsSigned = true;
-			}
-
-			void SetUnsignedInt(unsigned int value) {
-				m_IntValue = value;
-				m_Type = VariantType::VariantType_IntType;
-				m_WasIntHexa = false;
-				m_IsSigned = false;
-			}
-
-			void SetHexInt(unsigned int value) {
-				m_IntValue = value;
-				m_Type = VariantType::VariantType_IntType;
-				m_WasIntHexa = true;
-			}
-
-			void SetHexInt(std::uint64_t value) {
-				m_UnsignedInt64Value = value;
-				m_Type = VariantType::VariantType_UnsignedInt64Type;
-				m_WasIntHexa = true;
-			}
-
-			void SetHexInt(const char* valueStr) {
-				char* eptr = nullptr;
-
-				std::uint64_t value = strtoll(valueStr, &eptr, 16);
-				if (value < std::uint64_t(0x100000000))
-					SetHexInt(unsigned(value));
-				else
-					SetHexInt(value);
-			}
-
+			void SetInt(int value);
+			void SetUnsignedInt(unsigned int value);
+			void SetHexInt(unsigned int value);
+			void SetHexInt(std::uint64_t value);
+			void SetHexInt(const char* value);
 			void SetWasHexa(bool value) { m_WasIntHexa = value; }
 
 			void Clear() { *this = Variant(); }
