@@ -64,13 +64,16 @@ namespace cppidl {
 				m_CurrentValue.Clear();
 				break;
 			case PROD_ENUMCOMBINAISON:
-				m_NextEnumValue = m_CurrentValue.GetInt();	
+				m_NextEnumValue = m_CurrentValue.GetInt();
+				m_CurrentValue.Clear();
 				break;
 			case PROD_ENUMCOMBINAISON_PIPE:
 				m_NextEnumValue |= m_CurrentValue.GetInt();
+				m_CurrentValue.Clear();
 				break;
 			case PROD_ENUMCOMBINAISON_PLUS:
 				m_NextEnumValue += m_CurrentValue.GetInt();
+				m_CurrentValue.Clear();
 				break;
 
 			case PROD_ENUM:
