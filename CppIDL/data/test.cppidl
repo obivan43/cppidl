@@ -4,5 +4,10 @@ enum TestEnum
     SecondValue = -10,
     ThirdValue,
     FourthValue = 0x4a1,
-    FifthValue
+    FifthValue = FourthValue | SecondValue
+}
+
+enum TestEnum2
+{
+    TestValue = TestEnum::FourthValue | TestEnum::SecondValue
 }

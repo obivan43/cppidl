@@ -57,24 +57,25 @@ namespace cppidl {
 				break;
 			case PROD_ENUMVALUE_IDENTIFIER_EQ2:
 				CreateEnumEntry(m_NextEnumValue, false, true);
+				m_CurrentValue.Clear();
 				break;
 			case PROD_ENUMVALUE_IDENTIFIER_EQ3:
 				CreateEnumEntry(m_CurrentValue);
 				m_CurrentValue.Clear();
 				break;
 			case PROD_ENUMCOMBINAISON:
-				m_NextEnumValue = m_CurrentValue.GetInt();
-				m_CurrentValue.Clear();
+				m_NextEnumValue = m_CurrentValue.GetInt();	
 				break;
 			case PROD_ENUMCOMBINAISON_PIPE:
 				m_NextEnumValue |= m_CurrentValue.GetInt();
-				m_CurrentValue.Clear();
 				break;
 			case PROD_ENUMCOMBINAISON_PLUS:
 				m_NextEnumValue += m_CurrentValue.GetInt();
-				m_CurrentValue.Clear();
 				break;
 
+			case PROD_ENUM:
+				SetEnumValue();
+				break;
 			case PROD_SIGNEDNUMBER:
 				break;
 			case PROD_SIGNEDNUMBER_MINUS:
@@ -86,6 +87,15 @@ namespace cppidl {
 				break;
 			case PROD_UNSIGNEDNUMBER_HEXNUMBER:
 				m_CurrentValue.SetHexInt(m_Parser->GetChildLexeme(0));
+				break;
+
+			case PROD_SCOPEDIDENTIFIER_IDENTIFIER:
+				m_CurrentIdentifier = m_Parser->GetChildLexeme(0);
+				assert(!m_CurrentIdentifier.empty());
+				break;
+			case PROD_SCOPEDIDENTIFIER_IDENTIFIER_COLONCOLON:
+				assert(!m_CurrentIdentifier.empty());
+				m_CurrentIdentifier = std::string(m_Parser->GetChildLexeme(0)) + "::" + m_CurrentIdentifier;
 				break;
 
 			default:
@@ -113,6 +123,7 @@ namespace cppidl {
 		assert(!enumName.empty());
 		assert(m_CurrentFile);
 
+		m_CurrentIdentifier = enumName;
 		m_CurrentEnum = new Enum(enumName);
 
 		if (!m_CurrentFile->AddEnum(m_CurrentEnum)) {
@@ -154,6 +165,30 @@ namespace cppidl {
 		m_CurrentFile->AddConstant(enumEntry->GetName(), enumConstant);
 
 		m_NextEnumValue = enumEntry->GetValue().GetInt() + 1;
+	}
+
+	void CppIDLParser::SetEnumValue() {
+		int constantValue = 0;
+		if (m_CurrentFile->FindConstant(m_CurrentIdentifier, constantValue)) {
+			m_CurrentValue.SetEnum(m_CurrentIdentifier, constantValue);
+		}
+		else {
+			bool isFound = false;
+			if (m_CurrentEnum != nullptr) {
+				for (const EnumEntry* entry : m_CurrentEnum->GetEntries()) {
+					if (entry->GetName() == m_CurrentIdentifier) {
+						m_CurrentValue.SetEnum(m_CurrentIdentifier, entry->GetValue().GetInt());
+						isFound = true;
+						break;
+					}
+				}
+			}
+
+			if (!isFound) {
+				m_ParserState = CppIDLParserState::CppIDLParserState_EnumEntryError;
+				std::cerr << "Unable to find correspond enum value" << '\n';
+			}
+		}
 	}
 
 	void CppIDLParser::PrintEnums() {

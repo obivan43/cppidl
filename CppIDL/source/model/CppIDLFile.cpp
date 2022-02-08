@@ -24,4 +24,15 @@ namespace cppidl {
 		m_EnumConstants[constantName] = enumConstant;
 	}
 
+	bool File::FindConstant(std::string_view name, int& constantValue) {
+		auto it = m_EnumConstants.find(name);
+		bool isFound = (it != m_EnumConstants.end());
+		
+		if (isFound) {
+			constantValue = it->second.first;
+		}
+
+		return isFound;
+	}
+
 }

@@ -24,17 +24,18 @@ namespace cppidl {
 			CppIDLParserState Parse(const char* fileName);
 
 		private:
+			void SetEnumValue();
 			void CreateEnum(const char* name);
 			void CreateEnumEntry(int value, bool isHex, bool userSpecified);
 			void CreateEnumEntry(const Variant& value);
 			void CreateEnumEntryInternal(EnumEntry* enumEntry);
-
-			void Reset();
-
 			void PrintEnums();
+			
+			void Reset();
 
 		private:
 			Variant m_CurrentValue;
+			std::string m_CurrentIdentifier;
 			CppIDLParserState m_ParserState;
 
 			Enum* m_CurrentEnum;

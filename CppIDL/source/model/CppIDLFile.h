@@ -26,6 +26,8 @@ namespace cppidl {
 			bool AddEnum(Enum* enumInfo);
 			void AddConstant(std::string_view name, cppidl::EnumConstant& enumConstant);
 
+			bool FindConstant(std::string_view name, int& constantValue);
+
 		private:
 			std::string m_FileName;
 
