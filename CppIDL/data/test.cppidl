@@ -7,7 +7,7 @@ enum TestEnum
     FifthValue = FourthValue | SecondValue
 }
 
-enum TestEnum2
+enum class TestEnum2
 {
     TestValue = TestEnum::FourthValue | TestEnum::SecondValue
 }

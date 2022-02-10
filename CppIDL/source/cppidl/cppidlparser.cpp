@@ -42,6 +42,9 @@ namespace cppidl {
 			case PROD_ENUMTYPESPECIFICATION_COLON:
 				m_CurrentEnum->SetEnumImplementationType(m_Parser->GetChildLexeme(1));
 				break;
+			case PROD_ENUMCLASSDECLARATION_ENUM_CLASS_LBRACE_RBRACE:
+				m_CurrentEnum->SetIsEnumClass(true);
+				[[fallthrough]];
 			case PROD_ENUMDECLARATION_ENUM_LBRACE_RBRACE:
 				assert(m_CurrentEnum);
 				m_ParsedEnums.push_back(m_CurrentEnum);
@@ -196,7 +199,7 @@ namespace cppidl {
 
 	void CppIDLParser::PrintEnums() {
 		for (Enum* parsedEnum : m_ParsedEnums) {
-			std::cout << parsedEnum->GetName() << '\n';
+			std::cout << (parsedEnum->GetIsEnumClass() ? "enum class " : "enum ") << parsedEnum->GetName() << '\n';
 			for (EnumEntry* enumEntry : parsedEnum->GetEntries()) {
 				std::cout << enumEntry->GetName() << " = " << enumEntry->GetValue() << '\n';
 			}

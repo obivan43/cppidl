@@ -5,7 +5,7 @@
 
 namespace cppidl {
 
-	Enum::Enum(std::string_view name) : Element(ElementType::ElementType_Enum) {
+	Enum::Enum(std::string_view name) : Element(ElementType::ElementType_Enum), m_IsEnumClass(false) {
 		SetName(name);
 	}
 

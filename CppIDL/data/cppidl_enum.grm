@@ -34,10 +34,14 @@ CodeString       = ('C' | 'c') '"' ( {String Ch} | '\'{Printable} )* '"'
               | <TypeForwardDeclaration>
               
 <TypeDeclaration> ::= <EnumDeclaration>
+                    | <EnumClassDeclaration>
 
 <TypeForwardDeclaration> ::= enum <LineCapture> <ScopedIdentifier> <OptionalSemiColon>
+                           | enum class <LineCapture> <ScopedIdentifier> <OptionalSemiColon>
                           
 <EnumDeclaration> ::= enum <EnumDeclarationIdentifier> <EnumTypeSpecification> '{' <EnumValues> '}' <OptionalSemiColon>
+                   
+<EnumClassDeclaration> ::= enum class <EnumDeclarationIdentifier> <EnumTypeSpecification> '{' <EnumValues> '}' <OptionalSemiColon>
                    
 <EnumDeclarationIdentifier> ::= <LineCapture> Identifier
                           
